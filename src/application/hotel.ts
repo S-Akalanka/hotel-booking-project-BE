@@ -1,7 +1,10 @@
-import ValidationError from "../domain/errors/validation-error.js";
-import Hotel from "../entities/Hotel.js";
+import { Request, Response, NextFunction } from "express";
+import ValidationError from "../domain/errors/validation-error";
+import NotFoundError from "../domain/errors/not-found-error";
+import Hotel from "../entities/Hotel";
+import { CreateHotelDTO } from "../domain/dtos/hotel";
 
-export const getAllHotels = async (req, res) => {
+export const getAllHotels = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const hotels = await Hotel.find();
     res.status(200).json(hotels);
@@ -10,19 +13,15 @@ export const getAllHotels = async (req, res) => {
   }
 };
 
-export const createHotel = async (req, res) => {
+export const createHotel = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const hotelData = req.body;
-    if (
-      !hotelData.name ||
-      !hotelData.location ||
-      !hotelData.price ||
-      !Array.isArray(hotelData.images) ||
-      hotelData.images.length === 0
-    ) {
-      throw new ValidationError("Invalid hotel data");
+    const result = CreateHotelDTO.safeParse(hotelData);
+
+    if (!result.success) {
+      throw new ValidationError(`${result.error.message}`);
     }
-    const hotel = new Hotel(hotelData);
+    const hotel = new Hotel(result.data);
     await hotel.save();
     res.status(201).json(hotel);
   } catch (error) {
@@ -30,7 +29,7 @@ export const createHotel = async (req, res) => {
   }
 };
 
-export const getHotelById = async (req, res) => {
+export const getHotelById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { _id } = req.params;
     const hotel = await Hotel.findById(_id);
@@ -45,7 +44,7 @@ export const getHotelById = async (req, res) => {
   }
 };
 
-export const updateHotel = async (req, res, next) => {
+export const updateHotel = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const _id = req.params._id;
     const hotelData = req.body;
@@ -71,7 +70,7 @@ export const updateHotel = async (req, res, next) => {
   }
 };
 
-export const patchHotel = async (req, res, next) => {
+export const patchHotel = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const _id = req.params._id;
     const hotelData = req.body;
@@ -89,7 +88,7 @@ export const patchHotel = async (req, res, next) => {
   }
 };
 
-export const deleteHotel = async (req, res, next) => {
+export const deleteHotel = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const _id = req.params._id;
     const hotel = await Hotel.findById(_id);

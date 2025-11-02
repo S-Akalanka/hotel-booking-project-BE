@@ -1,6 +1,6 @@
 import express from "express"
-import { createHotel, deleteHotel, getAllHotels, getHotelById, patchHotel, updateHotel } from "../application/hotel.js";
-import isAuthenticated from "./middleware/authetication-middleware.js";
+import { createHotel, deleteHotel, getAllHotels, getHotelById, patchHotel, updateHotel } from "../application/hotel";
+import isAuthenticated from "./middleware/authetication-middleware";
 
 const hotelsRouter = express.Router();
 

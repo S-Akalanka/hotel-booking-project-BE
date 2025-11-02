@@ -1,0 +1,19 @@
+import { Request } from "express";
+
+declare module "express-serve-static-core" {
+  interface Request {
+    auth?: {
+      userId?: string;
+      sessionId?: string;
+      isAuthenticated?: boolean;
+      orgId?: string;
+      orgRole?: string;
+      orgSlug?: string;
+      actor?: {
+        id: string;
+        type: string;
+      };
+    };
+  }
+}
+

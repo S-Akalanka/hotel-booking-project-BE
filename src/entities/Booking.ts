@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 const bookingSchema = new mongoose.Schema({
   userId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
   },
   hotelId: {
@@ -18,7 +19,11 @@ const bookingSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  roomNumber: {
+  noOfRooms: {
+    type: Number,
+    required: true,
+  },
+  noOfGuests: {
     type: Number,
     required: true,
   },

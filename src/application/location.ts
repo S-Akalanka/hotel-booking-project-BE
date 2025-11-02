@@ -1,8 +1,9 @@
-import Location from "../entities/Location.js";
-import NotFoundError from "../domain/errors/not-found-error.js";
-import ValidationError from "../domain/errors/validation-error.js";
+import { Request, Response, NextFunction } from "express";
+import Location from "../entities/Location";
+import NotFoundError from "../domain/errors/not-found-error";
+import ValidationError from "../domain/errors/validation-error";
 
-export const getAllLocations = async (req, res, next) => {
+export const getAllLocations = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const locations = await Location.find();
     res.status(200).json(locations);
@@ -12,7 +13,7 @@ export const getAllLocations = async (req, res, next) => {
   }
 };
 
-export const createLocation = async (req, res, next) => {
+export const createLocation = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const locationData = req.body;
     if (!locationData.name) {
@@ -25,7 +26,7 @@ export const createLocation = async (req, res, next) => {
   }
 };
 
-export const getLocationById = async (req, res, next) => {
+export const getLocationById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const _id = req.params._id;
     const location = await Location.findById(_id);
@@ -38,7 +39,7 @@ export const getLocationById = async (req, res, next) => {
   }
 };
 
-export const updateLocation = async (req, res, next) => {
+export const updateLocation = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const _id = req.params._id;
     const locationData = req.body;
@@ -58,7 +59,7 @@ export const updateLocation = async (req, res, next) => {
   }
 };
 
-export const patchLocation = async (req, res, next) => {
+export const patchLocation = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const _id = req.params._id;
     const locationData = req.body;
@@ -76,7 +77,7 @@ export const patchLocation = async (req, res, next) => {
   }
 };
 
-export const deleteLocation = async (req, res, next) => {
+export const deleteLocation = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const _id = req.params._id;
     const location = await Location.findById(_id);

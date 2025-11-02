@@ -1,6 +1,6 @@
-import connectDB from "./db.js";
-import Hotel from "./entities/Hotel.js";
-import Location from "./entities/Location.js";
+import connectDB from "./db";
+import Hotel from "./entities/Hotel";
+import Location from "./entities/Location";
 
 const hotels = [
   {
