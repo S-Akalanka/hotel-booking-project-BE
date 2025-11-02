@@ -1,3 +1,4 @@
+import ValidationError from "../domain/errors/validation-error.js";
 import Hotel from "../entities/Hotel.js";
 
 export const getAllHotels = async (req, res) => {
@@ -5,7 +6,7 @@ export const getAllHotels = async (req, res) => {
     const hotels = await Hotel.find();
     res.status(200).json(hotels);
   } catch (error) {
-    console.log({ error: "Failed tp=o fetch hotels" });
+    next(error);
   }
 };
 
@@ -19,13 +20,13 @@ export const createHotel = async (req, res) => {
       !Array.isArray(hotelData.images) ||
       hotelData.images.length === 0
     ) {
-      return res.status(400).json({ error: "Missing required fields" });
+      throw new ValidationError("Invalid hotel data");
     }
     const hotel = new Hotel(hotelData);
     await hotel.save();
     res.status(201).json(hotel);
   } catch (error) {
-    res.status(500).json({ error: "Failed to create hotel" });
+    next(error);
   }
 };
 
@@ -35,68 +36,69 @@ export const getHotelById = async (req, res) => {
     const hotel = await Hotel.findById(_id);
 
     if (!hotel) {
-      return res.status(404).json({ error: "Hotel not found" });
+      throw new NotFoundError("Hotel not found");
     }
 
     res.status(200).json(hotel);
   } catch (error) {
-    return res.status(500).json({ error: "Failed to fetch data" });
+    next(error);
   }
 };
 
-export const updateHotel = async (req, res) => {
+export const updateHotel = async (req, res, next) => {
   try {
-    const { _id } = req.params;
-    const updateData = req.body;
-
-    const hotel = await Hotel.findByIdAndUpdate(_id, updateData);
-
-    if (!hotel) {
-      return res.status(404).json({ error: "Hotel not found" });
+    const _id = req.params._id;
+    const hotelData = req.body;
+    if (
+      !hotelData.name ||
+      !hotelData.location ||
+      !hotelData.price ||
+      !Array.isArray(hotelData.images) ||
+      hotelData.images.length === 0
+    ) {
+      throw new ValidationError("Invalid hotel data");
     }
 
-    res.status(200).json(hotel);
+    const hotel = await Hotel.findById(_id);
+    if (!hotel) {
+      throw new NotFoundError("Hotel not found");
+    }
+
+    await Hotel.findByIdAndUpdate(_id, hotelData);
+    res.status(200).json(hotelData);
   } catch (error) {
-    res.status(500).json({ error: "Failed to update hotel" });
+    next(error);
   }
 };
 
-export const patchHotel = async (req, res) => {
+export const patchHotel = async (req, res, next) => {
   try {
-    const { _id } = req.params;
-    const { price } = req.body;
-
-    if (price === undefined) {
-      return res.status(400).json({ error: "Price is required" });
+    const _id = req.params._id;
+    const hotelData = req.body;
+    if (!hotelData.price) {
+      throw new ValidationError("Price is required");
     }
-
-    const hotel = await Hotel.findByIdAndUpdate(
-      _id,
-      { price },
-      { new: true, runValidators: true }
-    );
-
+    const hotel = await Hotel.findById(_id);
     if (!hotel) {
-      return res.status(404).json({ error: "Hotel not found" });
+      throw new NotFoundError("Hotel not found");
     }
-
-    res.status(200).json(hotel);
+    await Hotel.findByIdAndUpdate(_id, { price: hotelData.price });
+    res.status(200).send();
   } catch (error) {
-    res.status(500).json({ error: "Failed to update hotel price" });
+    next(error);
   }
 };
 
-export const deleteHotel = async (req, res) => {
+export const deleteHotel = async (req, res, next) => {
   try {
-    const { _id } = req.params;
-    const hotel = await Hotel.findByIdAndDelete(_id);
-
+    const _id = req.params._id;
+    const hotel = await Hotel.findById(_id);
     if (!hotel) {
-      return res.status(404).json({ error: "Hotel not found" });
+      throw new NotFoundError("Hotel not found");
     }
-
-    res.status(200).json({ message: "Hotel deleted successfully" });
+    await Hotel.findByIdAndDelete(_id);
+    res.status(200).send();
   } catch (error) {
-    res.status(500).json({ error: "Failed to delete hotel" });
+    next(error);
   }
 };

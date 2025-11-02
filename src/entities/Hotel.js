@@ -3,8 +3,8 @@ import mongoose, { Schema } from "mongoose";
 const roomTypeSchema = new Schema({
   id: {
     type: String,
-    required: true,
-  },
+    required: [true, "Room type ID is required"]  
+},
   name: {
     type: String,
     required: true,
@@ -51,7 +51,7 @@ const hotelSchema = new Schema({
   },
   amenities: [
     {
-      name: { type: String, required: true },
+      name: { type: String },
       longName: { type: String },
       icon: { type: String },
     },
