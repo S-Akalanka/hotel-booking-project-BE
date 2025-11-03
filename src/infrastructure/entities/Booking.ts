@@ -23,9 +23,16 @@ const bookingSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  roomType: {
+    type: String,
+    required: true,
+  },
   noOfGuests: {
     type: Number,
     required: true,
+  },
+  roomNumbers: {
+    type: [Number],
   },
   paymentStatus: {
     type: String,

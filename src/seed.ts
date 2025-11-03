@@ -1,6 +1,6 @@
-import connectDB from "./db";
-import Hotel from "./entities/Hotel";
-import Location from "./entities/Location";
+import connectDB from "./infrastructure/db";
+import Hotel from "./infrastructure/entities/Hotel";
+import Location from "./infrastructure/entities/Location";
 
 const hotels = [
   {
@@ -37,6 +37,7 @@ const hotels = [
         id: "standard",
         name: "Standard Room",
         description: "Comfortable room with city view",
+        stripePriceId: "price_1SOtTDRzMPnVXe9gxzf4Wg88",
         price: 320,
         features: ["City View", "25 sqm", "Queen Bed", "Work Desk"],
       },
@@ -44,6 +45,7 @@ const hotels = [
         id: "deluxe",
         name: "Deluxe Suite",
         description: "Spacious suite with premium amenities",
+        stripePriceId: "price_1SPJSnRzMPnVXe9gkFsOQcqP",
         price: 450,
         features: ["Park View", "45 sqm", "King Bed", "Living Area", "Minibar"],
       },
@@ -51,6 +53,7 @@ const hotels = [
         id: "presidential",
         name: "Presidential Suite",
         description: "Ultimate luxury with panoramic views",
+        stripePriceId: "price_1SPJToRzMPnVXe9gX1eHYTyZ",
         price: 850,
         features: [
           "Panoramic View",
@@ -101,13 +104,15 @@ const hotels = [
         id: "standard",
         name: "Standard Room",
         description: "Comfortable room with city view",
-        price: 320,
+        stripePriceId: "price_1SPJZsRzMPnVXe9gWiYFFmXv",
+        price: 200,
         features: ["City View", "25 sqm", "Queen Bed", "Work Desk"],
       },
       {
         id: "deluxe",
         name: "Deluxe Suite",
         description: "Spacious suite with premium amenities",
+        stripePriceId: "price_1SPJZsRzMPnVXe9gQKVONY1x",
         price: 450,
         features: ["Park View", "45 sqm", "King Bed", "Living Area", "Minibar"],
       },
@@ -115,6 +120,7 @@ const hotels = [
         id: "presidential",
         name: "Presidential Suite",
         description: "Ultimate luxury with panoramic views",
+        stripePriceId: "price_1SPJYoRzMPnVXe9ghtzEkwmv",
         price: 850,
         features: [
           "Panoramic View",
@@ -165,13 +171,15 @@ const hotels = [
         id: "standard",
         name: "Standard Room",
         description: "Comfortable room with city view",
-        price: 320,
+        stripePriceId: "price_1SPJcZRzMPnVXe9gs64hoSah",
+        price: 250,
         features: ["City View", "25 sqm", "Queen Bed", "Work Desk"],
       },
       {
         id: "deluxe",
         name: "Deluxe Suite",
         description: "Spacious suite with premium amenities",
+        stripePriceId: "price_1SPJfLRzMPnVXe9gLBeZJkEH",
         price: 450,
         features: ["Park View", "45 sqm", "King Bed", "Living Area", "Minibar"],
       },
@@ -179,6 +187,7 @@ const hotels = [
         id: "presidential",
         name: "Presidential Suite",
         description: "Ultimate luxury with panoramic views",
+        stripePriceId: "price_1SPJfLRzMPnVXe9glKumITTO",
         price: 850,
         features: [
           "Panoramic View",

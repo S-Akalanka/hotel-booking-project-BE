@@ -14,6 +14,7 @@ export const CreateHotelDTO = z.object({
   location: z.string(),
   rating: z.number().min(0).max(5).optional(),
   reviews: z.array(z.string()).optional(),
+  stripePriceId: z.string().optional(),
   price: z.number(),
   description: z.string().optional(),
   amenities: z

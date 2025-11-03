@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from "express";
-import Booking from "../infrastructure/entities/Booking";
 import { CreateBookingDTO } from "../domain/dtos/booking";
 import ValidationError from "../domain/errors/validation-error";
 import NotFoundError from "../domain/errors/not-found-error";
 import Hotel from "../infrastructure/entities/Hotel";
 import { getAuth } from "@clerk/express";
 import UnauthorizedError from "../domain/errors/unauthorized-error";
-import User from "../entities/User";
+import User from "../infrastructure/entities/User";
+import Booking from "../infrastructure/entities/Booking";
+import mongoose from "mongoose";
 
 export const createBooking = async (
   req: Request,
@@ -14,34 +15,34 @@ export const createBooking = async (
   next: NextFunction
 ) => {
   try {
-    // 1️⃣ Validate input using Zod
+    // Validate input using Zod
     const bookingResult = CreateBookingDTO.safeParse(req.body);
     if (!bookingResult.success) {
       throw new ValidationError(bookingResult.error.message);
     }
 
-    const { hotelId, checkIn, checkOut, noOfGuests, userId, noOfRooms } =
+    const { userId, hotelId, checkIn, checkOut, noOfRooms, roomType, noOfGuests } =
       bookingResult.data;
 
     if (!userId) {
       throw new UnauthorizedError("Unauthorized");
     }
 
-    // 2️⃣ ✅ Validate hotelId before querying MongoDB
+    // Validate hotelId before querying MongoDB
     if (!mongoose.Types.ObjectId.isValid(hotelId)) {
       throw new NotFoundError("Hotel not found");
     }
 
-    // 3️⃣ Find hotel
+    // Find hotel
     const hotel = await Hotel.findById(hotelId);
     if (!hotel) {
       throw new NotFoundError("Hotel not found");
     }
 
-    // 4️⃣ Assign room numbers
+    // Assign room numbers
     const assignedRoomNumbers: number[] = [];
     for (let i = 0; i < noOfRooms; i++) {
-      let roomNumber: number;
+      let roomNumber: number = 0;
       let isAvailable = false;
       while (!isAvailable) {
         roomNumber = Math.floor(Math.random() * 1000) + 1;
@@ -60,19 +61,21 @@ export const createBooking = async (
       assignedRoomNumbers.push(roomNumber);
     }
 
-    // 5️⃣ Create booking
+    // Create booking
     const user = await User.findOne({ clerkId: userId }); // userId from Clerk
     if (!user) throw new NotFoundError("User not found");
 
     const newBooking = await Booking.create({
-      hotelId,
-      user,
+      userId: user._id,
+      hotelId: hotelId,
       checkIn: new Date(checkIn),
       checkOut: new Date(checkOut),
+      noOfRooms: noOfRooms,
+      roomType: roomType,
+      noOfGuests: noOfGuests,
       roomNumbers: assignedRoomNumbers,
-      noOfGuests,
       paymentStatus: "PENDING",
-    });
+    });    
 
     res.status(201).json(newBooking);
   } catch (error) {

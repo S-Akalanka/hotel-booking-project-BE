@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import Location from "../entities/Location";
+import Location from "../infrastructure/entities/Location";
 import NotFoundError from "../domain/errors/not-found-error";
 import ValidationError from "../domain/errors/validation-error";
 

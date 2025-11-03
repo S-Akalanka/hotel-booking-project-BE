@@ -12,6 +12,9 @@ const roomTypeSchema = new Schema({
   description: {
     type: String,
   },
+  stripePriceId: {
+    type: String,
+  },
   price: {
     type: Number,
     required: true,

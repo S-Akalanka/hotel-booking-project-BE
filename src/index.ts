@@ -2,7 +2,7 @@ import "dotenv/config";
 import express, { Request, Response, NextFunction } from "express"
 import hotelRouter from "./api/hotel";
 import cors from 'cors'
-import connectDB from "./db";
+import connectDB from "./infrastructure/db";
 import locationRouter from "./api/location";
 import { clerkMiddleware } from "@clerk/express";
 import globalErrorHandlingMiddleware from "./api/middleware/global-error-handling-middleware";

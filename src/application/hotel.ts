@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import ValidationError from "../domain/errors/validation-error";
 import NotFoundError from "../domain/errors/not-found-error";
-import Hotel from "../entities/Hotel";
+import Hotel from "../infrastructure/entities/Hotel";
 import { CreateHotelDTO } from "../domain/dtos/hotel";
 
 export const getAllHotels = async (req: Request, res: Response, next: NextFunction) => {
