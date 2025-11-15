@@ -1,5 +1,5 @@
 import express from "express"
-import { createHotel, deleteHotel, getAllHotels, getHotelById, patchHotel, updateHotel } from "../application/hotel";
+import { createHotel, deleteHotel, getAllHotels, getHotelById, patchHotel, searchHotels, updateHotel } from "../application/hotel";
 import isAuthenticated from "./middleware/authetication-middleware";
 
 const hotelsRouter = express.Router();
@@ -7,13 +7,17 @@ const hotelsRouter = express.Router();
 hotelsRouter
   .route("/")
   .get(getAllHotels)
-  .post(isAuthenticated,createHotel);
+  .post(isAuthenticated,createHotel)
+
+hotelsRouter
+  .route('/search')
+  .get(searchHotels)
 
 hotelsRouter
   .route("/:_id")
   .get(getHotelById)
   .put(updateHotel)
   .patch(patchHotel)
-  .delete(deleteHotel);
+  .delete(deleteHotel)
 
 export default hotelsRouter;    

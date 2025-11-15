@@ -3,8 +3,13 @@ import ValidationError from "../domain/errors/validation-error";
 import NotFoundError from "../domain/errors/not-found-error";
 import Hotel from "../infrastructure/entities/Hotel";
 import { CreateHotelDTO } from "../domain/dtos/hotel";
+import { tr } from "zod/v4/locales";
 
-export const getAllHotels = async (req: Request, res: Response, next: NextFunction) => {
+export const getAllHotels = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const hotels = await Hotel.find();
     res.status(200).json(hotels);
@@ -13,7 +18,11 @@ export const getAllHotels = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
-export const createHotel = async (req: Request, res: Response, next: NextFunction) => {
+export const createHotel = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const hotelData = req.body;
     const result = CreateHotelDTO.safeParse(hotelData);
@@ -29,7 +38,11 @@ export const createHotel = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const getHotelById = async (req: Request, res: Response, next: NextFunction) => {
+export const getHotelById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { _id } = req.params;
     const hotel = await Hotel.findById(_id);
@@ -44,7 +57,11 @@ export const getHotelById = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
-export const updateHotel = async (req: Request, res: Response, next: NextFunction) => {
+export const updateHotel = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const _id = req.params._id;
     const hotelData = req.body;
@@ -70,7 +87,11 @@ export const updateHotel = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const patchHotel = async (req: Request, res: Response, next: NextFunction) => {
+export const patchHotel = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const _id = req.params._id;
     const hotelData = req.body;
@@ -88,7 +109,11 @@ export const patchHotel = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-export const deleteHotel = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteHotel = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const _id = req.params._id;
     const hotel = await Hotel.findById(_id);
@@ -97,6 +122,43 @@ export const deleteHotel = async (req: Request, res: Response, next: NextFunctio
     }
     await Hotel.findByIdAndDelete(_id);
     res.status(200).send();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const searchHotels = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { location, checkIn, checkOut, guest } = req.query;
+
+    console.log(location, checkIn, checkOut, guest);
+
+    if (!location && !checkIn && !checkOut && !guest) {
+      console.log("1st");
+      throw new ValidationError("Location or/and all data required");
+    } else if (location && checkIn && checkOut && guest !== "0") {
+      // // Full filter logic placeholder
+      const hotels = await Hotel.find();
+      const filteredHotels = hotels.slice(3,).filter((hotel) => {
+        return hotel.location
+          .toLowerCase()
+          .includes(String(location).toLowerCase());
+      });
+      res.status(200).json(filteredHotels);
+    } else if (location) {
+      const hotels = await Hotel.find();
+      const filteredHotels = hotels.filter((hotel) => {
+        return hotel.location
+          .toLowerCase()
+          .includes(String(location).toLowerCase());
+      });
+      res.status(200).json(filteredHotels);
+    }
+    res.status(400).send();
   } catch (error) {
     next(error);
   }
