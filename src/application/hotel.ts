@@ -127,7 +127,7 @@ export const deleteHotel = async (
   }
 };
 
-export const searchHotels = async (
+export const filterHotels = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -135,15 +135,13 @@ export const searchHotels = async (
   try {
     const { location, checkIn, checkOut, guest } = req.query;
 
-    console.log(location, checkIn, checkOut, guest);
-
     if (!location && !checkIn && !checkOut && !guest) {
       console.log("1st");
       throw new ValidationError("Location or/and all data required");
     } else if (location && checkIn && checkOut && guest !== "0") {
       // // Full filter logic placeholder
       const hotels = await Hotel.find();
-      const filteredHotels = hotels.slice(3,).filter((hotel) => {
+      const filteredHotels = hotels.slice(3).filter((hotel) => {
         return hotel.location
           .toLowerCase()
           .includes(String(location).toLowerCase());
@@ -159,6 +157,87 @@ export const searchHotels = async (
       res.status(200).json(filteredHotels);
     }
     res.status(400).send();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const searchHotels = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { query, sortBy, page, maxPrice, minPrice, rating, amenities } =
+      req.query;
+
+    let hotels: any[] = await Hotel.find();
+
+    if (
+      !query &&
+      !sortBy &&
+      !page &&
+      !maxPrice &&
+      !minPrice &&
+      !rating &&
+      !amenities
+    ) {
+      return res.status(200).json(hotels);
+    }
+
+    // sortby
+    if (sortBy){
+      if (sortBy === "price-low")
+        hotels = await Hotel.find().sort({ price: 1 });
+      else if (sortBy === "price-high")
+        hotels = await Hotel.find().sort({ price: -1 });
+      else if (sortBy === "rating")
+        hotels = await Hotel.find().sort({ rating: -1 });
+    }
+
+    if (rating) {
+      hotels = hotels.filter((hotel) => {
+        return hotel.rating >= parseFloat(rating as string);
+      });
+    }
+
+    // amenities
+    if (amenities) {
+      const amenitiesArray = Array.isArray(amenities)
+        ? amenities
+        : [amenities];
+      hotels = hotels.filter((hotel) => {
+        return amenitiesArray.every((amenity) =>
+          hotel.amenities.map((a: any) => a.name).includes(amenity)
+        );
+      });
+    }
+
+    // query
+    if (query) {
+      hotels = hotels.filter((hotel) => {
+        return (
+          hotel.name.toLowerCase().includes(String(query).toLowerCase()) ||
+          hotel.location.toLowerCase().includes(String(query).toLowerCase())
+        );
+      });
+    }
+
+    // price range
+    if (minPrice && maxPrice) {
+      hotels = hotels.filter((hotel) => {
+        return (
+          hotel.price >= parseFloat(minPrice as string) &&
+          hotel.price <= parseFloat(maxPrice as string)
+        );
+      });
+    }  
+
+    // page
+    const pageNo = parseInt(req.query.page as string) || 1;
+    const limit = 7;
+    const skip = (pageNo - 1) * limit;
+    res.status(200).json(hotels.slice(skip, skip + limit));
   } catch (error) {
     next(error);
   }
