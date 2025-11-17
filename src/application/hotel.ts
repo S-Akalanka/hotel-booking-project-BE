@@ -75,7 +75,7 @@ export const updateHotel = async (
       throw new ValidationError("Invalid hotel data");
     }
 
-    const hotel = await Hotel.findById(_id);
+    const hotel = await Hotel.findById({_id});
     if (!hotel) {
       throw new NotFoundError("Hotel not found");
     }
@@ -136,7 +136,8 @@ export const filterHotels = async (
     const { location, checkIn, checkOut, guest } = req.query;
 
     if (!location && !checkIn && !checkOut && !guest) {
-      console.log("1st");
+
+      // todo error next, and validate existence
       throw new ValidationError("Location or/and all data required");
     } else if (location && checkIn && checkOut && guest !== "0") {
       // // Full filter logic placeholder
@@ -182,6 +183,7 @@ export const searchHotels = async (
       !rating &&
       !amenities
     ) {
+      // todo
       return res.status(200).json(hotels);
     }
 

@@ -21,8 +21,18 @@ export const createBooking = async (
       throw new ValidationError(bookingResult.error.message);
     }
 
-    const { userId, hotelId, checkIn, checkOut, noOfRooms, roomType, noOfGuests } =
-      bookingResult.data;
+    const {
+      userId,
+      hotelId,
+      checkIn,
+      checkOut,
+      noOfRooms,
+      roomType,
+      noOfGuests,
+      price,
+      status,
+      paymentStatus,
+    } = bookingResult.data;
 
     if (!userId) {
       throw new UnauthorizedError("Unauthorized");
@@ -74,8 +84,10 @@ export const createBooking = async (
       roomType: roomType,
       noOfGuests: noOfGuests,
       roomNumbers: assignedRoomNumbers,
-      paymentStatus: "PENDING",
-    });    
+      price: price,
+      status: status,
+      paymentStatus: paymentStatus,
+    });
 
     res.status(201).json(newBooking);
   } catch (error) {
@@ -83,7 +95,6 @@ export const createBooking = async (
     next(error);
   }
 };
-
 
 export const getAllBookingsForHotel = async (
   req: Request,
@@ -106,7 +117,7 @@ export const getAllBookings = async (
   next: NextFunction
 ) => {
   try {
-    const bookings = await Booking.find();
+    const bookings = await Booking.find().sort({ createdAt: -1 });
     res.status(200).json(bookings);
     return;
   } catch (error) {

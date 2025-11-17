@@ -9,5 +9,7 @@ export const CreateBookingDTO = z.object({
   roomType: z.string(),
   noOfGuests: z.number(),
   roomNumbers: z.array(z.number()).optional(),
-  paymentStatus: z.enum(["PENDING", "PAID"]).optional(),
+  price: z.number().optional(),
+  status: z.enum(["booked", "cancelled", "completed"]).optional(),
+  paymentStatus: z.enum(["pending", "paid","failed", "refunded"]).optional(),
 });

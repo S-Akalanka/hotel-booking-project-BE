@@ -1,8 +1,8 @@
-import { Request } from "express";
+import "@clerk/express";
 
 declare module "express-serve-static-core" {
   interface Request {
-    auth?: {
+    auth: () => {
       userId?: string;
       sessionId?: string;
       isAuthenticated?: boolean;
@@ -16,4 +16,3 @@ declare module "express-serve-static-core" {
     };
   }
 }
-

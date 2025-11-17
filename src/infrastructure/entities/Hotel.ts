@@ -3,8 +3,8 @@ import mongoose, { Schema } from "mongoose";
 const roomTypeSchema = new Schema({
   id: {
     type: String,
-    required: [true, "Room type ID is required"]  
-},
+    required: [true, "Room type ID is required"],
+  },
   name: {
     type: String,
     required: true,
@@ -24,46 +24,49 @@ const roomTypeSchema = new Schema({
   },
 });
 
-const hotelSchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  images: {
-    type: [String],
-    required: true,
-  },
-  location: {
-    type: String,
-    required: true,
-  },
-  rating: {
-    type: Number,
-    min: 0,
-    max: 5,
-  },
-  reviews: {
-    type: [String],
-  },
-  price: {
-    type: Number,
-    required: true,
-  },
-  description: {
-    type: String,
-  },
-  amenities: [
-    {
-      name: { type: String },
-      longName: { type: String },
-      icon: { type: String },
+const hotelSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
     },
-  ],
-  highlights: {
-    type: [String],
+    images: {
+      type: [String],
+      required: true,
+    },
+    location: {
+      type: String,
+      required: true,
+    },
+    rating: {
+      type: Number,
+      min: 0,
+      max: 5,
+    },
+    reviews: {
+      type: [String],
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    description: {
+      type: String,
+    },
+    amenities: [
+      {
+        name: { type: String },
+        longName: { type: String },
+        icon: { type: String },
+      },
+    ],
+    highlights: {
+      type: [String],
+    },
+    roomTypes: [roomTypeSchema],
   },
-  roomTypes: [roomTypeSchema],
-});
+  { timestamps: true }
+);
 
 const Hotel = mongoose.model("Hotel", hotelSchema);
 

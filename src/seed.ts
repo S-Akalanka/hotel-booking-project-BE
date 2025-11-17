@@ -1,6 +1,8 @@
 import connectDB from "./infrastructure/db";
 import Hotel from "./infrastructure/entities/Hotel";
 import Location from "./infrastructure/entities/Location";
+import Booking from "./infrastructure/entities/Booking";
+import User from "./infrastructure/entities/User";
 
 const hotels = [
   {
@@ -1302,6 +1304,8 @@ const seedDataBase = async () => {
 
     await Hotel.deleteMany({});
     await Location.deleteMany({});
+    await User.deleteMany({});
+    await Booking.deleteMany({});
 
     console.log("Cleared existing data");
 
@@ -1310,8 +1314,6 @@ const seedDataBase = async () => {
 
     const createdLocations = await Location.insertMany(locations);
     console.log(`Created ${createdLocations.length} locations`);
-
-    console.log("Updated hotels with review references");
 
     console.log("Database seeded successfully!");
 
