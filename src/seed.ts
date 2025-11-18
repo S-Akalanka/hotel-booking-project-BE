@@ -3,6 +3,7 @@ import Hotel from "./infrastructure/entities/Hotel";
 import Location from "./infrastructure/entities/Location";
 import Booking from "./infrastructure/entities/Booking";
 import User from "./infrastructure/entities/User";
+import { generateEmbedding } from "./application/utils/embeddings";
 
 const hotels = [
   {
@@ -1309,7 +1310,17 @@ const seedDataBase = async () => {
 
     console.log("Cleared existing data");
 
-    const createdHotels = await Hotel.insertMany(hotels);
+    const hotelsWithEmbeddings =  hotels.map(async (hotel) => {
+      console.log(`Generating embedding for ${hotel.name}`);
+        const embedding = await generateEmbedding(
+          `${hotel.name} ${hotel.description} ${hotel.location} ${hotel.price}`
+        );
+        return {...hotel, embedding};
+    });
+
+    const toBeCreatedHotels = await Promise.all(hotelsWithEmbeddings);
+
+    const createdHotels = await Hotel.insertMany(toBeCreatedHotels);
     console.log(`Created ${createdHotels.length} hotels`);
 
     const createdLocations = await Location.insertMany(locations);

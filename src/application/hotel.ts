@@ -2,8 +2,9 @@ import { Request, Response, NextFunction } from "express";
 import ValidationError from "../domain/errors/validation-error";
 import NotFoundError from "../domain/errors/not-found-error";
 import Hotel from "../infrastructure/entities/Hotel";
-import { CreateHotelDTO } from "../domain/dtos/hotel";
+import { CreateHotelDTO, SearchHotelDTO } from "../domain/dtos/hotel";
 import { tr } from "zod/v4/locales";
+import { generateEmbedding } from "./utils/embeddings";
 
 export const getAllHotels = async (
   req: Request,
@@ -30,9 +31,16 @@ export const createHotel = async (
     if (!result.success) {
       throw new ValidationError(`${result.error.message}`);
     }
-    const hotel = new Hotel(result.data);
-    await hotel.save();
-    res.status(201).json(hotel);
+    const embedding = await generateEmbedding(
+      `${result.data.name} ${result.data.description} ${result.data.location} ${result.data.price}`
+    );
+
+    await Hotel.create({
+      ...result.data,
+      embedding: embedding,
+    });
+
+    res.status(201).send();
   } catch (error) {
     next(error);
   }
@@ -75,7 +83,7 @@ export const updateHotel = async (
       throw new ValidationError("Invalid hotel data");
     }
 
-    const hotel = await Hotel.findById({_id});
+    const hotel = await Hotel.findById({ _id });
     if (!hotel) {
       throw new NotFoundError("Hotel not found");
     }
@@ -136,7 +144,6 @@ export const filterHotels = async (
     const { location, checkIn, checkOut, guest } = req.query;
 
     if (!location && !checkIn && !checkOut && !guest) {
-
       // todo error next, and validate existence
       throw new ValidationError("Location or/and all data required");
     } else if (location && checkIn && checkOut && guest !== "0") {
@@ -188,7 +195,7 @@ export const searchHotels = async (
     }
 
     // sortby
-    if (sortBy){
+    if (sortBy) {
       if (sortBy === "price-low")
         hotels = await Hotel.find().sort({ price: 1 });
       else if (sortBy === "price-high")
@@ -205,9 +212,7 @@ export const searchHotels = async (
 
     // amenities
     if (amenities) {
-      const amenitiesArray = Array.isArray(amenities)
-        ? amenities
-        : [amenities];
+      const amenitiesArray = Array.isArray(amenities) ? amenities : [amenities];
       hotels = hotels.filter((hotel) => {
         return amenitiesArray.every((amenity) =>
           hotel.amenities.map((a: any) => a.name).includes(amenity)
@@ -233,13 +238,57 @@ export const searchHotels = async (
           hotel.price <= parseFloat(maxPrice as string)
         );
       });
-    }  
+    }
 
     // page
     const pageNo = parseInt(req.query.page as string) || 1;
     const limit = 7;
     const skip = (pageNo - 1) * limit;
     res.status(200).json(hotels.slice(skip, skip + limit));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAllHotelsBySearchQuery = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = SearchHotelDTO.safeParse(req.query);
+    if (!result.success) {
+      throw new ValidationError(`${result.error.message}`);
+    }
+    const { query } = result.data;
+
+    const queryEmbedding = await generateEmbedding(query);
+
+    const hotels = await Hotel.aggregate([
+      {
+        $vectorSearch: {
+          index: "hotel_vector_index",
+          path: "embedding",
+          queryVector: queryEmbedding,
+          numCandidates: 25,
+          limit: 4,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          images: 1,
+          location: 1,
+          price: 1,
+          rating: 1,
+          amenities: 1,
+          score: { $meta: "vectorSearchScore" },
+        },
+      },
+    ]);
+
+    res.status(200).json(hotels);
   } catch (error) {
     next(error);
   }

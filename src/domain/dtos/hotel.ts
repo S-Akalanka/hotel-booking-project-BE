@@ -29,3 +29,7 @@ export const CreateHotelDTO = z.object({
   highlights: z.array(z.string()).optional(),
   roomTypes: z.array(RoomTypeDTO).optional(),
 });
+
+export const SearchHotelDTO = z.object({
+  query: z.string().min(1),
+});

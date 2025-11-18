@@ -64,6 +64,10 @@ const hotelSchema = new Schema(
       type: [String],
     },
     roomTypes: [roomTypeSchema],
+    embedding: {
+      type: [Number],
+      default: [],
+    },
   },
   { timestamps: true }
 );

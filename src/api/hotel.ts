@@ -1,5 +1,5 @@
 import express from "express"
-import { createHotel, deleteHotel, filterHotels, getAllHotels, getHotelById, patchHotel, searchHotels, updateHotel } from "../application/hotel";
+import { createHotel, deleteHotel, filterHotels, getAllHotels, getAllHotelsBySearchQuery, getHotelById, patchHotel, searchHotels, updateHotel } from "../application/hotel";
 import isAuthenticated from "./middleware/authetication-middleware";
 
 const hotelsRouter = express.Router();
@@ -16,6 +16,10 @@ hotelsRouter
 hotelsRouter
   .route('/search')
   .get(searchHotels)
+
+hotelsRouter
+  .route('/ai-search')
+  .get(isAuthenticated, getAllHotelsBySearchQuery)
 
 hotelsRouter
   .route("/:_id")
