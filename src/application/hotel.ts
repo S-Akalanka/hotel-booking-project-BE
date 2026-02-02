@@ -190,7 +190,6 @@ export const searchHotels = async (
       !rating &&
       !amenities
     ) {
-      // todo
       return res.status(200).json(hotels);
     }
 
@@ -244,7 +243,18 @@ export const searchHotels = async (
     const pageNo = parseInt(req.query.page as string) || 1;
     const limit = 7;
     const skip = (pageNo - 1) * limit;
-    res.status(200).json(hotels.slice(skip, skip + limit));
+
+    const totalResults = hotels.length
+
+    //slice
+    hotels = hotels.slice(skip, skip + limit);
+
+    const response = {
+      hotels: hotels,
+      totalResults: totalResults,
+    }
+
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }
