@@ -281,7 +281,7 @@ export const getAllHotelsBySearchQuery = async (
           path: "embedding",
           queryVector: queryEmbedding,
           numCandidates: 25,
-          limit: 4,
+          limit: 6,
         },
       },
       {

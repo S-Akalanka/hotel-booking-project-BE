@@ -9,6 +9,9 @@ const hotels = [
   {
     name: "Montmartre Majesty Hotel",
     images: [
+      "https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg",
+      "https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=1548&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg",
       "https://images.pexels.com/photos/189333/pexels-photo-189333.jpeg",
     ],
     location: "Paris, France",
@@ -1322,6 +1325,8 @@ const seedDataBase = async () => {
 
     const createdHotels = await Hotel.insertMany(toBeCreatedHotels);
     console.log(`Created ${createdHotels.length} hotels`);
+
+    // const createdHotels = await Hotel.insertMany(hotels);
 
     const createdLocations = await Location.insertMany(locations);
     console.log(`Created ${createdLocations.length} locations`);
