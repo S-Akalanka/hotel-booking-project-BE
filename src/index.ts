@@ -14,7 +14,9 @@ const app = express();
 app.use(express.json());
 app.use(
     cors({
-        origin: "http://localhost:5173"
+        origin: ["http://localhost:5173",
+          "https://azure-retreat.netlify.app"
+        ]
     })
 );
 
@@ -35,6 +37,6 @@ app.use(globalErrorHandlingMiddleware);
 connectDB();
 
 const PORT = 8000;
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log("Server is listening on PORT: ", PORT);
 });
