@@ -17,7 +17,10 @@ export const handleWebhook = async (req: Request, res: Response) => {
   }
 
   // 2. Handle successful payment events [cite: 220, 221]
-  if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
+  if (
+    event.type === "checkout.session.completed" ||
+    event.type === "checkout.session.async_payment_succeeded"
+  ) {
     const session = event.data.object as Stripe.Checkout.Session;
     const bookingId = session.metadata?.bookingId; // Retrieve our link [cite: 300]
 
@@ -37,37 +40,43 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
   try {
     const { bookingId } = req.body;
 
-    // 1. Find the booking the user just made
-    const booking = await Booking.findById(bookingId);
-    if (!booking) return res.status(404).json({ message: "Booking not found" });
-
-    // 2. Find the hotel to get its stripePriceId
-    const hotel = await Hotel.findById(booking.hotelId);
-    if (!hotel || !hotel.stripePriceId) {
-      return res.status(400).json({ message: "Hotel or Stripe Price ID not found" });
+    // Define what a "Populated" hotel looks like
+    interface PopulatedHotel {
+      _id: string;
+      name: string;
     }
 
-    // 3. Create the Stripe Session (Embedded Mode)
+    // Inside your controller:
+    const booking = await Booking.findById(bookingId).populate("hotelId");
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    // Tell TS that hotelId is now the full object, not just an ID
+    const hotel = booking.hotelId as unknown as PopulatedHotel;
+
     const session = await stripe.checkout.sessions.create({
       ui_mode: "embedded",
       line_items: [
         {
-          price: hotel.stripePriceId,
-          quantity: booking.noOfRooms, // Or your logic for number of nights/rooms
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `${hotel.name} - ${booking.roomType} Room`, // Now .name works!
+              description: `${booking.noOfRooms} room(s) for ${booking.noOfGuests} guests`,
+            },
+            unit_amount: Math.round(booking.price! * 100),
+          },
+          quantity: 1,
         },
       ],
       mode: "payment",
-      // This sends the user back to your site after they pay
       return_url: `${process.env.FRONTEND_URL}/booking/complete?session_id={CHECKOUT_SESSION_ID}`,
       metadata: {
-        bookingId: booking._id.toString(), // THIS LINKS THE PAYMENT TO THE BOOKING
+        bookingId: booking._id.toString(),
       },
     });
 
-    // 4. Send the client_secret back to the Frontend
     res.send({ clientSecret: session.client_secret });
   } catch (error: any) {
-    console.error("Stripe Session Error:", error);
     res.status(500).json({ error: error.message });
   }
 };

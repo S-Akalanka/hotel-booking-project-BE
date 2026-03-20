@@ -25,7 +25,6 @@ export const createHotel = async (
   res: Response,
   next: NextFunction,
 ) => {
-  
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2026-02-25.clover",
   });
@@ -37,26 +36,47 @@ export const createHotel = async (
     if (!result.success) {
       throw new ValidationError(`${result.error.message}`);
     }
+
+    // 1. Generate Embedding
     const embedding = await generateEmbedding(
       `${result.data.name} ${result.data.description} ${result.data.location} ${result.data.price}`,
     );
 
+    // 2. Create the main Stripe Product for the Hotel
     const product = await stripe.products.create({
       name: result.data.name,
       description: result.data.description,
-      default_price_data: {
-        unit_amount: Math.round(result.data.price * 100),
-        currency: "usd",
-      },
     });
 
-    await Hotel.create({
+    // 3. Create Stripe Prices for each Room Type
+    if (!result.data.roomTypes || result.data.roomTypes.length === 0) {
+      throw new Error("Room types are required");
+    }
+
+    const roomTypesWithStripe = await Promise.all(
+      result.data.roomTypes.map(async (room) => {
+        const price = await stripe.prices.create({
+          product: product.id,
+          unit_amount: Math.round(room.price * 100),
+          currency: "usd",
+        });
+
+        return {
+          ...room,
+          stripePriceId: price.id,
+        };
+      }),
+    );
+
+    // 4. Save to MongoDB
+    const newHotel = await Hotel.create({
       ...result.data,
-      embedding: embedding,
-      stripePriceId: product.default_price,
+      stripePriceId: product.id, // This is the Product ID
+      roomTypes: roomTypesWithStripe, // These have individual Price IDs
+      embedding,
     });
 
-    res.status(201).send();
+    res.status(201).json(newHotel);
   } catch (error) {
     next(error);
   }
