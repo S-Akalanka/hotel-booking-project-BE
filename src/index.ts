@@ -8,6 +8,7 @@ import { clerkMiddleware } from "@clerk/express";
 import globalErrorHandlingMiddleware from "./api/middleware/global-error-handling-middleware";
 import userRouter from "./api/user";
 import bookingRouter from "./api/booking";
+import paymentRouter from "./api/payment";
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api/hotels", hotelRouter);
 app.use("/api/locations", locationRouter);
 app.use("/api/users", userRouter);
 app.use("/api/booking", bookingRouter);
+app.use("/api/payments", paymentRouter);
 
 app.use(globalErrorHandlingMiddleware);
 
