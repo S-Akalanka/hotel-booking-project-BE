@@ -4,6 +4,7 @@ import Location from "./infrastructure/entities/Location";
 import Booking from "./infrastructure/entities/Booking";
 import User from "./infrastructure/entities/User";
 import { generateEmbedding } from "./application/utils/embeddings";
+import { Stripe } from "stripe";
 
 const hotels = [
   {
@@ -225,7 +226,11 @@ const hotels = [
       { name: "Concierge", longName: "Personal Concierge", icon: "Users" },
       { name: "Room Service", longName: "24/7 Room Service", icon: "Coffee" },
       { name: "Bar", longName: "Sky Bar", icon: "Coffee" },
-      { name: "Business Center", longName: "Executive Business Center", icon: "Users" },
+      {
+        name: "Business Center",
+        longName: "Executive Business Center",
+        icon: "Users",
+      },
     ],
     highlights: [
       "Times Square location",
@@ -250,7 +255,13 @@ const hotels = [
         description: "Spacious suite with skyline views",
         stripePriceId: "price_1SPK2bRzMPnVXe9gY3gIZUaA",
         price: 520,
-        features: ["Skyline View", "50 sqm", "King Bed", "Living Area", "Minibar"],
+        features: [
+          "Skyline View",
+          "50 sqm",
+          "King Bed",
+          "Living Area",
+          "Minibar",
+        ],
       },
       {
         id: "presidential",
@@ -288,7 +299,11 @@ const hotels = [
       { name: "Concierge", longName: "Concierge Service", icon: "Users" },
       { name: "Room Service", longName: "24/7 Room Service", icon: "Coffee" },
       { name: "Bar", longName: "Traditional Pub", icon: "Coffee" },
-      { name: "Afternoon Tea", longName: "Afternoon Tea Service", icon: "Coffee" },
+      {
+        name: "Afternoon Tea",
+        longName: "Afternoon Tea Service",
+        icon: "Coffee",
+      },
     ],
     highlights: [
       "River Thames views",
@@ -313,7 +328,13 @@ const hotels = [
         description: "Elegant suite with Thames views",
         stripePriceId: "price_1SPK5eRzMPnVXe9gB6jLZXcD",
         price: 480,
-        features: ["Thames View", "48 sqm", "King Bed", "Sitting Area", "Minibar"],
+        features: [
+          "Thames View",
+          "48 sqm",
+          "King Bed",
+          "Sitting Area",
+          "Minibar",
+        ],
       },
       {
         id: "presidential",
@@ -346,7 +367,11 @@ const hotels = [
       { name: "Beach", longName: "Private Beach", icon: "Waves" },
       { name: "Pool", longName: "Infinity Pool", icon: "Waves" },
       { name: "Spa", longName: "Luxury Arabian Spa", icon: "Waves" },
-      { name: "Restaurant", longName: "Michelin-Starred Dining", icon: "Utensils" },
+      {
+        name: "Restaurant",
+        longName: "Michelin-Starred Dining",
+        icon: "Utensils",
+      },
       { name: "Gym", longName: "Premium Fitness Center", icon: "Dumbbell" },
       { name: "WiFi", longName: "High-Speed WiFi", icon: "Wifi" },
       { name: "Concierge", longName: "24/7 Concierge", icon: "Users" },
@@ -377,7 +402,13 @@ const hotels = [
         description: "Palatial suite with panoramic views",
         stripePriceId: "price_1SPK8hRzMPnVXe9gE9mOacfG",
         price: 850,
-        features: ["Panoramic View", "70 sqm", "King Bed", "Living Room", "Jacuzzi"],
+        features: [
+          "Panoramic View",
+          "70 sqm",
+          "King Bed",
+          "Living Room",
+          "Jacuzzi",
+        ],
       },
       {
         id: "presidential",
@@ -504,7 +535,13 @@ const hotels = [
         description: "Spacious suite with skyline views",
         stripePriceId: "price_1SPK4nRzMPnVXe9gK5sUgiKM",
         price: 580,
-        features: ["Skyline View", "55 sqm", "King Bed", "Living Room", "Minibar"],
+        features: [
+          "Skyline View",
+          "55 sqm",
+          "King Bed",
+          "Living Room",
+          "Minibar",
+        ],
       },
       {
         id: "presidential",
@@ -568,7 +605,13 @@ const hotels = [
         description: "Luxury villa with pool access",
         stripePriceId: "price_1SPK7qRzMPnVXe9gN8vXjlMP",
         price: 320,
-        features: ["Pool View", "60 sqm", "King Bed", "Private Pool", "Terrace"],
+        features: [
+          "Pool View",
+          "60 sqm",
+          "King Bed",
+          "Private Pool",
+          "Terrace",
+        ],
       },
       {
         id: "presidential",
@@ -600,7 +643,11 @@ const hotels = [
     amenities: [
       { name: "WiFi", longName: "Free WiFi", icon: "Wifi" },
       { name: "Spa", longName: "Roman Spa", icon: "Waves" },
-      { name: "Restaurant", longName: "Michelin-Starred Restaurant", icon: "Utensils" },
+      {
+        name: "Restaurant",
+        longName: "Michelin-Starred Restaurant",
+        icon: "Utensils",
+      },
       { name: "Gym", longName: "Fitness Center", icon: "Dumbbell" },
       { name: "Parking", longName: "Valet Parking", icon: "Car" },
       { name: "Concierge", longName: "Concierge Service", icon: "Users" },
@@ -631,7 +678,13 @@ const hotels = [
         description: "Luxurious suite with Colosseum views",
         stripePriceId: "price_1SPK0tRzMPnVXe9gQ1yAmoPS",
         price: 520,
-        features: ["Colosseum View", "50 sqm", "King Bed", "Living Room", "Balcony"],
+        features: [
+          "Colosseum View",
+          "50 sqm",
+          "King Bed",
+          "Living Room",
+          "Balcony",
+        ],
       },
       {
         id: "presidential",
@@ -664,7 +717,11 @@ const hotels = [
       { name: "WiFi", longName: "Free WiFi", icon: "Wifi" },
       { name: "Spa", longName: "Parisian Spa", icon: "Waves" },
       { name: "Pool", longName: "Indoor Pool", icon: "Waves" },
-      { name: "Restaurant", longName: "Michelin-Starred Restaurant", icon: "Utensils" },
+      {
+        name: "Restaurant",
+        longName: "Michelin-Starred Restaurant",
+        icon: "Utensils",
+      },
       { name: "Gym", longName: "Fitness Center", icon: "Dumbbell" },
       { name: "Parking", longName: "Valet Parking", icon: "Car" },
       { name: "Concierge", longName: "Concierge Service", icon: "Users" },
@@ -694,7 +751,13 @@ const hotels = [
         description: "Luxurious suite with Eiffel Tower views",
         stripePriceId: "price_1SPK3wRzMPnVXe9gT4zDnpQT",
         price: 580,
-        features: ["Tower View", "55 sqm", "King Bed", "Living Room", "Terrace"],
+        features: [
+          "Tower View",
+          "55 sqm",
+          "King Bed",
+          "Living Room",
+          "Terrace",
+        ],
       },
       {
         id: "presidential",
@@ -757,7 +820,13 @@ const hotels = [
         description: "Spacious suite with skyline views",
         stripePriceId: "price_1SPK6zRzMPnVXe9gW7zGnpQT",
         price: 520,
-        features: ["Skyline View", "50 sqm", "King Bed", "Living Area", "Onsen"],
+        features: [
+          "Skyline View",
+          "50 sqm",
+          "King Bed",
+          "Living Area",
+          "Onsen",
+        ],
       },
       {
         id: "presidential",
@@ -789,7 +858,11 @@ const hotels = [
     amenities: [
       { name: "WiFi", longName: "Free WiFi", icon: "Wifi" },
       { name: "Pool", longName: "Rooftop Pool", icon: "Waves" },
-      { name: "Restaurant", longName: "Farm-to-Table Restaurant", icon: "Utensils" },
+      {
+        name: "Restaurant",
+        longName: "Farm-to-Table Restaurant",
+        icon: "Utensils",
+      },
       { name: "Gym", longName: "Fitness Studio", icon: "Dumbbell" },
       { name: "Parking", longName: "Valet Parking", icon: "Car" },
       { name: "Concierge", longName: "Concierge Service", icon: "Users" },
@@ -883,7 +956,13 @@ const hotels = [
         description: "Spacious suite with street views",
         stripePriceId: "price_1SPK2fRzMPnVXe9gC3zMnpQT",
         price: 460,
-        features: ["Street View", "45 sqm", "King Bed", "Sitting Room", "Balcony"],
+        features: [
+          "Street View",
+          "45 sqm",
+          "King Bed",
+          "Sitting Room",
+          "Balcony",
+        ],
       },
       {
         id: "presidential",
@@ -947,7 +1026,13 @@ const hotels = [
         description: "Luxurious suite with beach access",
         stripePriceId: "price_1SPK5iRzMPnVXe9gF6zPnpQT",
         price: 720,
-        features: ["Beach View", "65 sqm", "King Bed", "Living Room", "Terrace"],
+        features: [
+          "Beach View",
+          "65 sqm",
+          "King Bed",
+          "Living Room",
+          "Terrace",
+        ],
       },
       {
         id: "presidential",
@@ -1010,7 +1095,13 @@ const hotels = [
         description: "Spacious suite with canal views",
         stripePriceId: "price_1SPK8lRzMPnVXe9gI9zSnpQT",
         price: 420,
-        features: ["Canal View", "48 sqm", "King Bed", "Living Area", "Balcony"],
+        features: [
+          "Canal View",
+          "48 sqm",
+          "King Bed",
+          "Living Area",
+          "Balcony",
+        ],
       },
       {
         id: "presidential",
@@ -1042,7 +1133,11 @@ const hotels = [
     amenities: [
       { name: "Pool", longName: "Infinity Pool", icon: "Waves" },
       { name: "Spa", longName: "Aegean Spa", icon: "Waves" },
-      { name: "Restaurant", longName: "Mediterranean Restaurant", icon: "Utensils" },
+      {
+        name: "Restaurant",
+        longName: "Mediterranean Restaurant",
+        icon: "Utensils",
+      },
       { name: "Gym", longName: "Fitness Center", icon: "Dumbbell" },
       { name: "WiFi", longName: "Free WiFi", icon: "Wifi" },
       { name: "Parking", longName: "Valet Parking", icon: "Car" },
@@ -1074,7 +1169,13 @@ const hotels = [
         description: "Luxury cave suite with pool access",
         stripePriceId: "price_1SPK1oRzMPnVXe9gL2zVnpQT",
         price: 580,
-        features: ["Caldera View", "60 sqm", "King Bed", "Private Pool", "Terrace"],
+        features: [
+          "Caldera View",
+          "60 sqm",
+          "King Bed",
+          "Private Pool",
+          "Terrace",
+        ],
       },
       {
         id: "presidential",
@@ -1138,7 +1239,13 @@ const hotels = [
         description: "Luxurious suite with panoramic views",
         stripePriceId: "price_1SPK4rRzMPnVXe9gO5zYnpQT",
         price: 480,
-        features: ["Panoramic View", "55 sqm", "King Bed", "Living Room", "Balcony"],
+        features: [
+          "Panoramic View",
+          "55 sqm",
+          "King Bed",
+          "Living Room",
+          "Balcony",
+        ],
       },
       {
         id: "presidential",
@@ -1265,7 +1372,13 @@ const hotels = [
         description: "Luxurious suite with rooftop access",
         stripePriceId: "price_1SPK0xRzMPnVXe9gU1zenpQT",
         price: 340,
-        features: ["Rooftop View", "48 sqm", "King Bed", "Living Area", "Terrace"],
+        features: [
+          "Rooftop View",
+          "48 sqm",
+          "King Bed",
+          "Living Area",
+          "Terrace",
+        ],
       },
       {
         id: "presidential",
@@ -1313,18 +1426,42 @@ const seedDataBase = async () => {
 
     console.log("Cleared existing data");
 
-    const hotelsWithEmbeddings =  hotels.map(async (hotel) => {
-      console.log(`Generating embedding for ${hotel.name}`);
-        const embedding = await generateEmbedding(
-          `${hotel.name} ${hotel.description} ${hotel.location} ${hotel.price}`
-        );
-        return {...hotel, embedding};
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: "2026-02-25.clover",
     });
 
-    const toBeCreatedHotels = await Promise.all(hotelsWithEmbeddings);
+    const seedHotels = async () => {
+      for (const hotel of hotels) {
+        console.log(`Processing: ${hotel.name}`);
 
-    const createdHotels = await Hotel.insertMany(toBeCreatedHotels);
-    console.log(`Created ${createdHotels.length} hotels`);
+        const embedding = await generateEmbedding(
+          `${hotel.name} ${hotel.description} ${hotel.location} ${hotel.price}`,
+        );
+
+        const product = await stripe.products.create({
+          name: hotel.name,
+          description: hotel.description,
+          default_price_data: {
+            unit_amount: Math.round(hotel.price * 100),
+            currency: "usd",
+          },
+        });
+
+        await Hotel.create({
+          ...hotel,
+          embedding,
+          stripePriceId: product.default_price,
+        });
+
+        console.log(
+          `Created ${hotel.name} with Stripe Price: ${product.default_price}`,
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
+    };
+
+    await seedHotels();
 
     // const createdHotels = await Hotel.insertMany(hotels);
 
@@ -1335,7 +1472,7 @@ const seedDataBase = async () => {
 
     // Display summary
     console.log("\n=== SEED SUMMARY ===");
-    console.log(`Hotels: ${createdHotels.length}`);
+    console.log(`Hotels: ${seedHotels.length}`);
     console.log(`Locations: ${createdLocations.length}`);
     // console.log(`Users: ${createdUsers.length}`);
     // console.log(`Reviews: ${createdReviews.length}`);

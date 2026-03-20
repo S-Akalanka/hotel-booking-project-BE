@@ -5,11 +5,12 @@ import Hotel from "../infrastructure/entities/Hotel";
 import { CreateHotelDTO, SearchHotelDTO } from "../domain/dtos/hotel";
 import { tr } from "zod/v4/locales";
 import { generateEmbedding } from "./utils/embeddings";
+import Stripe from "stripe";
 
 export const getAllHotels = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const hotels = await Hotel.find();
@@ -22,8 +23,13 @@ export const getAllHotels = async (
 export const createHotel = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
+  
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2026-02-25.clover",
+  });
+
   try {
     const hotelData = req.body;
     const result = CreateHotelDTO.safeParse(hotelData);
@@ -32,12 +38,22 @@ export const createHotel = async (
       throw new ValidationError(`${result.error.message}`);
     }
     const embedding = await generateEmbedding(
-      `${result.data.name} ${result.data.description} ${result.data.location} ${result.data.price}`
+      `${result.data.name} ${result.data.description} ${result.data.location} ${result.data.price}`,
     );
+
+    const product = await stripe.products.create({
+      name: result.data.name,
+      description: result.data.description,
+      default_price_data: {
+        unit_amount: Math.round(result.data.price * 100),
+        currency: "usd",
+      },
+    });
 
     await Hotel.create({
       ...result.data,
       embedding: embedding,
+      stripePriceId: product.default_price,
     });
 
     res.status(201).send();
@@ -49,7 +65,7 @@ export const createHotel = async (
 export const getHotelById = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { _id } = req.params;
@@ -68,7 +84,7 @@ export const getHotelById = async (
 export const updateHotel = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const _id = req.params._id;
@@ -98,7 +114,7 @@ export const updateHotel = async (
 export const patchHotel = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const _id = req.params._id;
@@ -120,7 +136,7 @@ export const patchHotel = async (
 export const deleteHotel = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const _id = req.params._id;
@@ -138,7 +154,7 @@ export const deleteHotel = async (
 export const filterHotels = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { location, checkIn, checkOut, guest } = req.query;
@@ -173,7 +189,7 @@ export const filterHotels = async (
 export const searchHotels = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { query, sortBy, page, maxPrice, minPrice, rating, amenities } =
@@ -214,7 +230,7 @@ export const searchHotels = async (
       const amenitiesArray = Array.isArray(amenities) ? amenities : [amenities];
       hotels = hotels.filter((hotel) => {
         return amenitiesArray.every((amenity) =>
-          hotel.amenities.map((a: any) => a.name).includes(amenity)
+          hotel.amenities.map((a: any) => a.name).includes(amenity),
         );
       });
     }
@@ -244,7 +260,7 @@ export const searchHotels = async (
     const limit = 7;
     const skip = (pageNo - 1) * limit;
 
-    const totalResults = hotels.length
+    const totalResults = hotels.length;
 
     //slice
     hotels = hotels.slice(skip, skip + limit);
@@ -252,7 +268,7 @@ export const searchHotels = async (
     const response = {
       hotels: hotels,
       totalResults: totalResults,
-    }
+    };
 
     res.status(200).json(response);
   } catch (error) {
@@ -263,7 +279,7 @@ export const searchHotels = async (
 export const getAllHotelsBySearchQuery = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const result = SearchHotelDTO.safeParse(req.query);

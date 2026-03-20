@@ -26,6 +26,10 @@ const roomTypeSchema = new Schema({
 
 const hotelSchema = new Schema(
   {
+    stripePriceId: { 
+      type: String,
+      required: true,
+    },
     name: {
       type: String,
       required: true,

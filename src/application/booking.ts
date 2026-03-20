@@ -12,17 +12,22 @@ import mongoose from "mongoose";
 export const createBooking = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
-    // Validate input using Zod
     const bookingResult = CreateBookingDTO.safeParse(req.body);
     if (!bookingResult.success) {
       throw new ValidationError(bookingResult.error.message);
     }
 
+    // 1. Get Secure User Identity from Clerk
+    const { userId } = getAuth(req);
+    if (!userId) {
+      throw new UnauthorizedError("Unauthorized"); // [cite: 290]
+    }
+
+    // 2. Validate Hotel & Data
     const {
-      userId,
       hotelId,
       checkIn,
       checkOut,
@@ -30,26 +35,12 @@ export const createBooking = async (
       roomType,
       noOfGuests,
       price,
-      status,
-      paymentStatus,
     } = bookingResult.data;
-
-    if (!userId) {
-      throw new UnauthorizedError("Unauthorized");
-    }
-
-    // Validate hotelId before querying MongoDB
     if (!mongoose.Types.ObjectId.isValid(hotelId)) {
       throw new NotFoundError("Hotel not found");
     }
 
-    // Find hotel
-    const hotel = await Hotel.findById(hotelId);
-    if (!hotel) {
-      throw new NotFoundError("Hotel not found");
-    }
-
-    // Assign room numbers
+    // 3. Room Assignment Logic
     const assignedRoomNumbers: number[] = [];
     for (let i = 0; i < noOfRooms; i++) {
       let roomNumber: number = 0;
@@ -71,10 +62,11 @@ export const createBooking = async (
       assignedRoomNumbers.push(roomNumber);
     }
 
-    // Create booking
-    const user = await User.findOne({ clerkId: userId }); // userId from Clerk
+    // 4. Find the Database User record
+    const user = await User.findOne({ clerkId: userId });
     if (!user) throw new NotFoundError("User not found");
 
+    // 5. Create the "Payable Entity" with PENDING status [cite: 33, 34, 59, 60]
     const newBooking = await Booking.create({
       userId: user._id,
       hotelId: hotelId,
@@ -85,13 +77,12 @@ export const createBooking = async (
       noOfGuests: noOfGuests,
       roomNumbers: assignedRoomNumbers,
       price: price,
-      status: status,
-      paymentStatus: paymentStatus,
+      status: "CONFIRMED",
+      paymentStatus: "PENDING",
     });
 
     res.status(201).json(newBooking);
   } catch (error) {
-    console.error("Create Booking Error:", error);
     next(error);
   }
 };
@@ -99,7 +90,7 @@ export const createBooking = async (
 export const getAllBookingsForHotel = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const hotelId = req.params.hotelId;
@@ -114,7 +105,7 @@ export const getAllBookingsForHotel = async (
 export const getAllBookings = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const bookings = await Booking.find().sort({ createdAt: -1 });
@@ -128,7 +119,7 @@ export const getAllBookings = async (
 export const getBookingById = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const bookingId = req.params.bookingId;
