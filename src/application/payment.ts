@@ -34,23 +34,18 @@ export const handleWebhook = async (req: Request, res: Response) => {
   res.status(200).json({ received: true });
 };
 
-import Hotel from "../infrastructure/entities/Hotel"; // Adjust path to your Hotel model
-
 export const createCheckoutSession = async (req: Request, res: Response) => {
   try {
     const { bookingId } = req.body;
 
-    // Define what a "Populated" hotel looks like
     interface PopulatedHotel {
       _id: string;
       name: string;
     }
 
-    // Inside your controller:
     const booking = await Booking.findById(bookingId).populate("hotelId");
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    // Tell TS that hotelId is now the full object, not just an ID
     const hotel = booking.hotelId as unknown as PopulatedHotel;
 
     const session = await stripe.checkout.sessions.create({
@@ -60,7 +55,7 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
           price_data: {
             currency: "usd",
             product_data: {
-              name: `${hotel.name} - ${booking.roomType} Room`, // Now .name works!
+              name: `${hotel.name} - ${booking.roomType} Room`,
               description: `${booking.noOfRooms} room(s) for ${booking.noOfGuests} guests`,
             },
             unit_amount: Math.round(booking.price! * 100),

@@ -71,8 +71,8 @@ export const createHotel = async (
     // 4. Save to MongoDB
     const newHotel = await Hotel.create({
       ...result.data,
-      stripePriceId: product.id, // This is the Product ID
-      roomTypes: roomTypesWithStripe, // These have individual Price IDs
+      stripePriceId: product.id,
+      roomTypes: roomTypesWithStripe,
       embedding,
     });
 
@@ -180,10 +180,8 @@ export const filterHotels = async (
     const { location, checkIn, checkOut, guest } = req.query;
 
     if (!location && !checkIn && !checkOut && !guest) {
-      // todo error next, and validate existence
       throw new ValidationError("Location or/and all data required");
     } else if (location && checkIn && checkOut && guest !== "0") {
-      // // Full filter logic placeholder
       const hotels = await Hotel.find();
       const filteredHotels = hotels.slice(3).filter((hotel) => {
         return hotel.location
