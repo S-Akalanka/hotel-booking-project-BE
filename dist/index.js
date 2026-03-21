@@ -13,10 +13,13 @@ var express_2 = require("@clerk/express");
 var global_error_handling_middleware_1 = __importDefault(require("./api/middleware/global-error-handling-middleware"));
 var user_1 = __importDefault(require("./api/user"));
 var booking_1 = __importDefault(require("./api/booking"));
+var payment_1 = __importDefault(require("./api/payment"));
 var app = (0, express_1.default)();
+var FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 app.use(express_1.default.json());
 app.use((0, cors_1.default)({
-    origin: "http://localhost:5173"
+    origin: [FRONTEND_URL, "http://localhost:5173"],
+    credentials: true,
 }));
 app.use((0, express_2.clerkMiddleware)());
 app.use(function (req, res, next) {
@@ -27,10 +30,11 @@ app.use("/api/hotels", hotel_1.default);
 app.use("/api/locations", location_1.default);
 app.use("/api/users", user_1.default);
 app.use("/api/booking", booking_1.default);
+app.use("/api/payments", payment_1.default);
 app.use(global_error_handling_middleware_1.default);
 (0, db_1.default)();
-var PORT = 8000;
+var PORT = process.env.PORT || 8000;
 app.listen(PORT, function () {
-    console.log("Server is listening on PORT: ", PORT);
+    console.log("Server is listening on PORT:", PORT);
 });
 //# sourceMappingURL=index.js.map

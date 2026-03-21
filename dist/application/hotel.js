@@ -56,6 +56,7 @@ var not_found_error_1 = __importDefault(require("../domain/errors/not-found-erro
 var Hotel_1 = __importDefault(require("../infrastructure/entities/Hotel"));
 var hotel_1 = require("../domain/dtos/hotel");
 var embeddings_1 = require("./utils/embeddings");
+var stripe_1 = __importDefault(require("stripe"));
 var getAllHotels = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var hotels, error_1;
     return __generator(this, function (_a) {
@@ -77,29 +78,61 @@ var getAllHotels = function (req, res, next) { return __awaiter(void 0, void 0, 
 }); };
 exports.getAllHotels = getAllHotels;
 var createHotel = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var hotelData, result, embedding, error_2;
+    var stripe, hotelData, result, embedding, product_1, roomTypesWithStripe, newHotel, error_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 3, , 4]);
+                stripe = new stripe_1.default(process.env.STRIPE_SECRET_KEY, {
+                    apiVersion: "2026-02-25.clover",
+                });
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 6, , 7]);
                 hotelData = req.body;
                 result = hotel_1.CreateHotelDTO.safeParse(hotelData);
                 if (!result.success) {
                     throw new validation_error_1.default("".concat(result.error.message));
                 }
                 return [4 /*yield*/, (0, embeddings_1.generateEmbedding)("".concat(result.data.name, " ").concat(result.data.description, " ").concat(result.data.location, " ").concat(result.data.price))];
-            case 1:
-                embedding = _a.sent();
-                return [4 /*yield*/, Hotel_1.default.create(__assign(__assign({}, result.data), { embedding: embedding }))];
             case 2:
-                _a.sent();
-                res.status(201).send();
-                return [3 /*break*/, 4];
+                embedding = _a.sent();
+                return [4 /*yield*/, stripe.products.create({
+                        name: result.data.name,
+                        description: result.data.description,
+                    })];
             case 3:
+                product_1 = _a.sent();
+                // 3. Create Stripe Prices for each Room Type
+                if (!result.data.roomTypes || result.data.roomTypes.length === 0) {
+                    throw new Error("Room types are required");
+                }
+                return [4 /*yield*/, Promise.all(result.data.roomTypes.map(function (room) { return __awaiter(void 0, void 0, void 0, function () {
+                        var price;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, stripe.prices.create({
+                                        product: product_1.id,
+                                        unit_amount: Math.round(room.price * 100),
+                                        currency: "usd",
+                                    })];
+                                case 1:
+                                    price = _a.sent();
+                                    return [2 /*return*/, __assign(__assign({}, room), { stripePriceId: price.id })];
+                            }
+                        });
+                    }); }))];
+            case 4:
+                roomTypesWithStripe = _a.sent();
+                return [4 /*yield*/, Hotel_1.default.create(__assign(__assign({}, result.data), { stripePriceId: product_1.id, roomTypes: roomTypesWithStripe, embedding: embedding }))];
+            case 5:
+                newHotel = _a.sent();
+                res.status(201).json(newHotel);
+                return [3 /*break*/, 7];
+            case 6:
                 error_2 = _a.sent();
                 next(error_2);
-                return [3 /*break*/, 4];
-            case 4: return [2 /*return*/];
+                return [3 /*break*/, 7];
+            case 7: return [2 /*return*/];
         }
     });
 }); };
@@ -229,7 +262,6 @@ var filterHotels = function (req, res, next) { return __awaiter(void 0, void 0, 
                 _b.trys.push([0, 6, , 7]);
                 _a = req.query, location_1 = _a.location, checkIn = _a.checkIn, checkOut = _a.checkOut, guest = _a.guest;
                 if (!(!location_1 && !checkIn && !checkOut && !guest)) return [3 /*break*/, 1];
-                // todo error next, and validate existence
                 throw new validation_error_1.default("Location or/and all data required");
             case 1:
                 if (!(location_1 && checkIn && checkOut && guest !== "0")) return [3 /*break*/, 3];

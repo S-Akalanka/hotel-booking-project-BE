@@ -43,13 +43,13 @@ var bookingSchema = new mongoose_1.default.Schema({
     },
     status: {
         type: String,
-        enum: ["booked", "cancelled", "completed"],
-        default: "booked",
+        enum: ["PENDING", "CONFIRMED", "CANCELLED"],
+        default: "PENDING",
     },
     paymentStatus: {
         type: String,
-        enum: ["pending", "paid", "failed", "refunded"],
-        default: "pending",
+        enum: ["PENDING", "PAID", "FAILED", "REFUNDED"],
+        default: "PENDING",
     },
 }, { timestamps: true });
 var Booking = mongoose_1.default.model("Booking", bookingSchema);

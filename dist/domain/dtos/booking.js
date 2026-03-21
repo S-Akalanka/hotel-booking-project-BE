@@ -12,7 +12,7 @@ exports.CreateBookingDTO = zod_1.z.object({
     noOfGuests: zod_1.z.number(),
     roomNumbers: zod_1.z.array(zod_1.z.number()).optional(),
     price: zod_1.z.number().optional(),
-    status: zod_1.z.enum(["booked", "cancelled", "completed"]).optional(),
-    paymentStatus: zod_1.z.enum(["pending", "paid", "failed", "refunded"]).optional(),
+    status: zod_1.z.enum(["PENDING", "CONFIRMED", "CANCELLED"]).optional(),
+    paymentStatus: zod_1.z.enum(["PENDING", "PAID", "FAILED", "REFUNDED"]).optional(),
 });
 //# sourceMappingURL=booking.js.map

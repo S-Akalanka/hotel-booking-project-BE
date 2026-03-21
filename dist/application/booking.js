@@ -43,45 +43,39 @@ exports.getBookingById = exports.getAllBookings = exports.getAllBookingsForHotel
 var booking_1 = require("../domain/dtos/booking");
 var validation_error_1 = __importDefault(require("../domain/errors/validation-error"));
 var not_found_error_1 = __importDefault(require("../domain/errors/not-found-error"));
-var Hotel_1 = __importDefault(require("../infrastructure/entities/Hotel"));
+var express_1 = require("@clerk/express");
 var unauthorized_error_1 = __importDefault(require("../domain/errors/unauthorized-error"));
 var User_1 = __importDefault(require("../infrastructure/entities/User"));
 var Booking_1 = __importDefault(require("../infrastructure/entities/Booking"));
 var mongoose_1 = __importDefault(require("mongoose"));
 var createBooking = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var bookingResult, _a, userId, hotelId, checkIn, checkOut, noOfRooms, roomType, noOfGuests, price, status, paymentStatus, hotel, assignedRoomNumbers, i, roomNumber, isAvailable, existingBooking, user, newBooking, error_1;
+    var bookingResult, userId, _a, hotelId, checkIn, checkOut, noOfRooms, roomType, noOfGuests, price, assignedRoomNumbers, i, roomNumber, isAvailable, existingBooking, user, newBooking, error_1;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _b.trys.push([0, 10, , 11]);
+                _b.trys.push([0, 9, , 10]);
                 bookingResult = booking_1.CreateBookingDTO.safeParse(req.body);
                 if (!bookingResult.success) {
                     throw new validation_error_1.default(bookingResult.error.message);
                 }
-                _a = bookingResult.data, userId = _a.userId, hotelId = _a.hotelId, checkIn = _a.checkIn, checkOut = _a.checkOut, noOfRooms = _a.noOfRooms, roomType = _a.roomType, noOfGuests = _a.noOfGuests, price = _a.price, status = _a.status, paymentStatus = _a.paymentStatus;
+                userId = (0, express_1.getAuth)(req).userId;
                 if (!userId) {
-                    throw new unauthorized_error_1.default("Unauthorized");
+                    throw new unauthorized_error_1.default("Unauthorized"); // [cite: 290]
                 }
-                // Validate hotelId before querying MongoDB
+                _a = bookingResult.data, hotelId = _a.hotelId, checkIn = _a.checkIn, checkOut = _a.checkOut, noOfRooms = _a.noOfRooms, roomType = _a.roomType, noOfGuests = _a.noOfGuests, price = _a.price;
                 if (!mongoose_1.default.Types.ObjectId.isValid(hotelId)) {
-                    throw new not_found_error_1.default("Hotel not found");
-                }
-                return [4 /*yield*/, Hotel_1.default.findById(hotelId)];
-            case 1:
-                hotel = _b.sent();
-                if (!hotel) {
                     throw new not_found_error_1.default("Hotel not found");
                 }
                 assignedRoomNumbers = [];
                 i = 0;
-                _b.label = 2;
-            case 2:
-                if (!(i < noOfRooms)) return [3 /*break*/, 7];
+                _b.label = 1;
+            case 1:
+                if (!(i < noOfRooms)) return [3 /*break*/, 6];
                 roomNumber = 0;
                 isAvailable = false;
-                _b.label = 3;
-            case 3:
-                if (!!isAvailable) return [3 /*break*/, 5];
+                _b.label = 2;
+            case 2:
+                if (!!isAvailable) return [3 /*break*/, 4];
                 roomNumber = Math.floor(Math.random() * 1000) + 1;
                 return [4 /*yield*/, Booking_1.default.findOne({
                         hotelId: hotelId,
@@ -93,18 +87,18 @@ var createBooking = function (req, res, next) { return __awaiter(void 0, void 0,
                             },
                         ],
                     })];
-            case 4:
+            case 3:
                 existingBooking = _b.sent();
                 isAvailable = !existingBooking;
-                return [3 /*break*/, 3];
-            case 5:
-                assignedRoomNumbers.push(roomNumber);
-                _b.label = 6;
-            case 6:
-                i++;
                 return [3 /*break*/, 2];
-            case 7: return [4 /*yield*/, User_1.default.findOne({ clerkId: userId })];
-            case 8:
+            case 4:
+                assignedRoomNumbers.push(roomNumber);
+                _b.label = 5;
+            case 5:
+                i++;
+                return [3 /*break*/, 1];
+            case 6: return [4 /*yield*/, User_1.default.findOne({ clerkId: userId })];
+            case 7:
                 user = _b.sent();
                 if (!user)
                     throw new not_found_error_1.default("User not found");
@@ -118,19 +112,18 @@ var createBooking = function (req, res, next) { return __awaiter(void 0, void 0,
                         noOfGuests: noOfGuests,
                         roomNumbers: assignedRoomNumbers,
                         price: price,
-                        status: status,
-                        paymentStatus: paymentStatus,
+                        status: "CONFIRMED",
+                        paymentStatus: "PENDING",
                     })];
-            case 9:
+            case 8:
                 newBooking = _b.sent();
                 res.status(201).json(newBooking);
-                return [3 /*break*/, 11];
-            case 10:
+                return [3 /*break*/, 10];
+            case 9:
                 error_1 = _b.sent();
-                console.error("Create Booking Error:", error_1);
                 next(error_1);
-                return [3 /*break*/, 11];
-            case 11: return [2 /*return*/];
+                return [3 /*break*/, 10];
+            case 10: return [2 /*return*/];
         }
     });
 }); };

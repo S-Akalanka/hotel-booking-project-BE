@@ -58,6 +58,10 @@ var roomTypeSchema = new mongoose_1.Schema({
     },
 });
 var hotelSchema = new mongoose_1.Schema({
+    stripePriceId: {
+        type: String,
+        required: true,
+    },
     name: {
         type: String,
         required: true,
